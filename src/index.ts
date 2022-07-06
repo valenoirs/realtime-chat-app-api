@@ -1,7 +1,7 @@
 import config from './config/config'
-import express, { application, Express, Request, Response } from 'express'
+import express, { Express } from 'express'
 import { createServer, Server as httpServer } from 'http'
-import helmet, { crossOriginResourcePolicy } from 'helmet'
+import helmet from 'helmet'
 import cors from 'cors'
 import { Socket, Server as ioServer } from 'socket.io'
 import path from 'path'
@@ -45,6 +45,10 @@ app.use(helmet())
 app.use(cors())
 app.use(express.urlencoded({extended: true}))
 app.use(express.json())
+
+app.use(morgan('combined', {
+    stream: logStream
+}))
 
 // Session middleware
 session({
