@@ -6,6 +6,7 @@ const MONGO_URI: string = process.env.MONGO_URI ?? 'mongodb://127.0.0.1:27017/da
 const SESSION_SECRET: string = process.env.SESSION_SECRET ?? 'valenoirs'
 const SESSION_COLLECTION_NAME: string = process.env.SESSION_COLLECTION_NAME ?? 'session'
 const SESSION_LIFETIME: number = 1000 * 60 * 60 * 24 // a day
+const SALT: number = Number(process.env.SALT) ?? 10
 const CORS = {
     cors: {
         origin: '*',
@@ -20,7 +21,8 @@ const config = {
     SESSION_SECRET,
     SESSION_COLLECTION_NAME,
     SESSION_LIFETIME,
-    CORS
+    CORS,
+    SALT
 }
 
 export default config
