@@ -15,6 +15,7 @@ import MongoStore from 'connect-mongo'
 // Importing routes
 import {router as defaultRoutes} from './routes/default'
 import {router as userRoutes} from './routes/user'
+import {router as chatRoutes} from './routes/chat'
 
 // Init
 const port = config.PORT
@@ -58,6 +59,7 @@ session({
 
 // HTTP Routes
 app.use('/api/v1/user', userRoutes)
+app.use('api/v1/chat', chatRoutes)
 app.use('/', defaultRoutes)
 
 // io on connection
