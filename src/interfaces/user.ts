@@ -4,7 +4,9 @@ export interface IUser {
     name: string,
     email: string,
     password: string,
-    isVerified: boolean
+    isVerified: boolean,
+    code: string,
+    codeExpires: Date | null
 }
 
 export interface IUserMethod {

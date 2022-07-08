@@ -6,4 +6,7 @@ export const router: Router = Router()
 router.post('/signin', user.signIn)
 router.post('/signup', user.signUp)
 router.get('/signout', user.signOut)
-router.get('/verify', user.verify)
+
+router.route('/verify')
+.get(user.verify)
+.post(user.generateCode)

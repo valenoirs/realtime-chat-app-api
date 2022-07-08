@@ -8,6 +8,8 @@ const UserSchema: Schema = new Schema<IUser, UserModel, IUserMethod>({
     email: {type: String, required: true, unique: true},
     password: {type: String, required: true},
     isVerified: {type: Boolean, default: false},
+    code: {type: String, default: Math.floor(100000 + Math.random() * 900000).toString()},
+    codeExpires: {type:Date, default: new Date(Date.now() + 60 * 1000 * 15)} // 15min
 },
 {
     timestamps: true

@@ -1,18 +1,19 @@
 import config from '../config/config'
 import { Request, Response } from 'express'
-import { userSignInValidation, userSignUpValidation } from '../helper/user-validation'
+import { userSignInValidation, userSignUpValidation, userVerificationValidation } from '../helper/user-validation'
 import { IUser } from '../interfaces/user'
 import { User } from '../models/user'
+import { now } from 'mongoose'
 
 /**
  * User sign in
- * @param req Node HTTP Request
- * @param res Node HTTP Response
+ * @param req Express HTTP Request
+ * @param res Express HTTP Response
  * @returns HTTP Response
  */
 export const signIn = async (req: Request, res: Response) => {
     try {
-        const value: Omit<IUser, 'name'> = await userSignInValidation.validateAsync(req.body)
+        const value: Pick<IUser, 'email'| 'password'> = await userSignInValidation.validateAsync(req.body)
         
         const {email, password} = value
 
@@ -61,10 +62,11 @@ export const signIn = async (req: Request, res: Response) => {
                 }
             })
         }
-
+        
         // Set client session
-        const clientSession: Pick<IUser, 'name' | 'email'> = {
+        const clientSession: Pick<IUser, 'name' | 'email' | 'isVerified'> = {
             name: user.name,
+            isVerified: user.isVerified,
             email
         }
 
@@ -96,14 +98,14 @@ export const signIn = async (req: Request, res: Response) => {
 
 /**
  * User sign up
- * @param req Node HTTP Request
- * @param res Node HTTP Response
+ * @param req Express HTTP Request
+ * @param res Express HTTP Response
  * @returns HTTP Response
  */
 export const signUp = async (req: Request, res: Response) => {
     try {
         // Validate user sign up
-        const value: IUser = await userSignUpValidation.validateAsync(req.body)
+        const value: Pick<IUser, 'email' | 'name' | 'password'> = await userSignUpValidation.validateAsync(req.body)
         
         const {email} = value
 
@@ -125,6 +127,8 @@ export const signUp = async (req: Request, res: Response) => {
 
         // Save new user
         await new User(value).save()
+
+        // TODO : Create function to send user email with code or link
 
         // Success
         console.error('[server]: OK! user signed up!')
@@ -151,8 +155,8 @@ export const signUp = async (req: Request, res: Response) => {
 
 /**
  * Sign out user
- * @param req Node HTTP Request
- * @param res Node HTTP Response
+ * @param req Express HTTP Request
+ * @param res Express HTTP Response
  * @returns HTTP Response
  */
 export const signOut = async (req: Request, res: Response): Promise<any> => {
@@ -199,16 +203,103 @@ export const signOut = async (req: Request, res: Response): Promise<any> => {
 }
 
 /**
+ * Generate user verification code
+ * @param req Express HTTP Request
+ * @param res Express HTTP Response
+ * @returns HTTP Response
+ */
+export const generateCode = async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body
+
+        const user = await User.findOne({email})
+
+        // Check if user exist
+        if(!user){
+            // Error
+            console.error('[server]: ERR! user not found!')
+            return res.status(401).send({
+                error: true,
+                status: 401,
+                type: 'SignInError',
+                data: {
+                    message: 'User with corresponding email not found.'
+                }
+            })
+        }
+
+        user.code = Math.floor(100000 + Math.random() * 900000).toString()
+        user.codeExpires = new Date(Date.now() + 60 * 1000 * 15)
+
+        user.save()
+
+        // TODO : Create function to send user email with code or link
+
+        // Success
+        console.error('[server]: OK! user generate new verification code!')
+        return res.status(200).send({
+            error: true,
+            status: 200,
+            data: {
+                message: 'New verification code generated.'
+            }
+        })
+    } catch (error) {
+        // Error
+        console.error('[server]: ERR! user verification error!', error)
+        return res.status(500).send({
+            error: true,
+            status: 500,
+            type: 'UserVerifyError',
+            data: {
+                message: 'Something went wrong while verifying user, please try again.'
+            }
+        }) 
+    }
+}
+
+/**
  * Verify user account
- * @param req Node HTTP Request
- * @param res Node HTTP Response
+ * @param req Express HTTP Request
+ * @param res Express HTTP Response
  * @returns HTTP Response
  */
 export const verify = async (req: Request, res: Response) => {
     try {
+        // Validate user verification
+        const value: Pick<IUser, 'email' | 'code'> = await userVerificationValidation.validateAsync(req.query)
 
+        const {email, code} = value
+
+        const user = await User.findOne({
+            email,
+            code,
+            codeExpires: {$gt: new Date(Date.now())}
+        })
+
+        // Check if user exist
+        if(!user){
+            // Error
+            console.error('[server]: ERR! invalid verification credential provided!')
+            return res.status(401).send({
+                error: true,
+                status: 401,
+                type: 'UserVerificationError',
+                data: {
+                    message: 'Invalid information provided to verify user. It\'s either invalid email, invalid code, or code has expired.'
+                }
+            })
+        }
+
+        // Update user information
+        user.code = ''
+        user.codeExpires = null
+        user.isVerified = true
+
+        await user.save()
+        
         // Success
-        console.error('[server]: OK! user signed up!')
+        console.error('[server]: OK! user verified!')
         return res.status(200).send({
             error: true,
             status: 200,
@@ -222,7 +313,7 @@ export const verify = async (req: Request, res: Response) => {
         return res.status(500).send({
             error: true,
             status: 500,
-            type: 'UserVerifyError',
+            type: 'UserVerificationError',
             data: {
                 message: 'Something went wrong while verifying user, please try again.'
             }

@@ -38,7 +38,7 @@ const store: MongoStore = MongoStore.create({
 // Connectin to MongoDB
 connect(config.MONGO_URI)
 .then(() => console.log('[server]: OK! successfully connected to mongodb'))
-.catch(error => console.error('[server]: OK! successfully connected to mongodb', error))
+.catch(error => console.error('[server]: ERR! failed connecting to mongodb', error))
 
 // Middleware
 app.use(helmet())
@@ -51,7 +51,7 @@ app.use(morgan('combined', {
 }))
 
 // Session middleware
-session({
+app.use(session({
     secret: config.SESSION_SECRET,
     store,
     resave: false,
@@ -59,7 +59,7 @@ session({
     cookie:{
         maxAge: config.SESSION_LIFETIME
     }
-})
+}))
 
 // HTTP Routes
 app.use('/api/v1/user', userRoutes)
