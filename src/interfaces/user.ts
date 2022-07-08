@@ -13,4 +13,4 @@ export interface IUserMethod {
     comparePassword(password: string): boolean
 }
 
-export type UserModel = Model<IUser, {}, IUserMethod>
+export type TUserModel = Model<IUser, {}, IUserMethod>

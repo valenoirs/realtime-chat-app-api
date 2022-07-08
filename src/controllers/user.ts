@@ -3,7 +3,6 @@ import { Request, Response } from 'express'
 import { userSignInValidation, userSignUpValidation, userVerificationValidation } from '../helper/user-validation'
 import { IUser } from '../interfaces/user'
 import { User } from '../models/user'
-import { now } from 'mongoose'
 
 /**
  * User sign in
