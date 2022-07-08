@@ -1,7 +1,9 @@
 import { Router } from 'express'
+import * as user from '../controllers/user'
 
 export const router: Router = Router()
 
-router.post('/login')
-router.post('/register')
-router.put('/edit')
+router.post('/signin', user.signIn)
+router.post('/signup', user.signUp)
+router.get('/signout', user.signOut)
+router.get('/verify', user.verify)
