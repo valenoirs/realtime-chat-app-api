@@ -1,13 +1,13 @@
 import { Model, Types } from "mongoose"
 
 export interface IChat {
-    sender: string,
-    receiver: string
+    user: Types.Array<string>,
     messages: IMessage[]
 }
 
 export interface IMessage {
     name: string,
+    email: string,
     message: string
 }
 

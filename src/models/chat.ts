@@ -5,6 +5,7 @@ import { TUserModel } from "../interfaces/user";
 
 const MessageSchema: Schema = new Schema<IMessage>({
     name: {type:String, required:true},
+    email: {type:String, required:true},
     message: {type:String, required:true}
 },
 {
@@ -14,8 +15,7 @@ const MessageSchema: Schema = new Schema<IMessage>({
 })
 
 const ChatSchema: Schema = new Schema<IChat, TUserModel>({
-    sender: {type:String, required: true},
-    receiver: {type:String, required:true},
+    user: {type:[String], required:true},
     messages: [MessageSchema]
 },
 {

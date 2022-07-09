@@ -63,7 +63,7 @@ app.use(session({
 
 // HTTP Routes
 app.use('/api/v1/user', userRoutes)
-app.use('api/v1/chat', chatRoutes)
+app.use('/api/v1/chat', chatRoutes)
 app.use('/', defaultRoutes)
 
 // io on connection
